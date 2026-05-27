@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """
 Termux server that receives image paths from Arduino macro,
-converts them to 1-bit packed rows, and sends to ESP32 printer.
+converts them to 1-bit packed rows, and sends to ESP32 printer AP.
 
-Usage: python3 server.py --port 5000 --esp32-ip 192.168.1.100
+ESP32 creates WiFi AP: ESP32_PRINTER / printer123
+Connect to it, then run:
+
+  python3 server.py --esp32-ip 192.168.4.1 --port 5000
+
+Then from Arduino macro trigger:
+  http://192.168.0.X:5000/print?image=/path/to/photo.jpg
+  (where 192.168.0.X is Termux IP on the AP)
 """
 
 from flask import Flask, request, jsonify
@@ -17,7 +24,7 @@ from pathlib import Path
 app = Flask(__name__)
 
 # Global config
-ESP32_IP = "192.168.1.100"
+ESP32_IP = "192.168.4.1"
 ESP32_PORT = 80
 PRINTER_WIDTH = 384
 GRAYSCALE_DENSITY = 65
@@ -171,7 +178,7 @@ def handle_config():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Termux photo printer server')
     parser.add_argument('--port', type=int, default=5000, help='Server port (default: 5000)')
-    parser.add_argument('--esp32-ip', default='192.168.1.100', help='ESP32 IP address')
+    parser.add_argument('--esp32-ip', default='192.168.4.1', help='ESP32 AP IP (default: 192.168.4.1)')
     parser.add_argument('--density', type=int, default=65, help='Grayscale density 0-100 (default: 65)')
     parser.add_argument('--host', default='0.0.0.0', help='Server host (default: 0.0.0.0)')
     
@@ -183,11 +190,17 @@ if __name__ == '__main__':
     print(f"""
 ╔════════════════════════════════════════════╗
 ║   TERMUX PHOTO PRINTER SERVER              ║
+║   (Connected to ESP32 WiFi AP)             ║
 ╚════════════════════════════════════════════╝
 
+Setup:
+  1. ESP32 starts and creates WiFi AP
+  2. Phone connects to "ESP32_PRINTER" (password: printer123)
+  3. Run this server on Termux
+
 Config:
-  - Server: http://{args.host}:{args.port}
-  - ESP32: http://{ESP32_IP}:{ESP32_PORT}
+  - Termux Server: http://0.0.0.0:{args.port}
+  - ESP32 AP IP: {ESP32_IP}:{ESP32_PORT}
   - Grayscale Density: {GRAYSCALE_DENSITY}%
 
 Endpoints:
