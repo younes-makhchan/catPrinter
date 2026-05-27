@@ -59,6 +59,56 @@ options:
 ✅ Done.
 ```
 
+# Text Printing
+
+Text can be rendered directly to the printer bitmap without ImageMagick:
+
+```bash
+$ ./print.py --text "YOU GOT HACKED" --text-size 40
+```
+
+Useful options:
+
+```bash
+$ ./print.py --text "hello" --text-align center --text-margin 16
+$ ./print.py --text "fast test" --device <address-or-name> --chunk-delay 0.01
+```
+
+To inspect the generated bitmap bounds before printing, use the preview with a
+debug border:
+
+```bash
+$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-border --show-preview
+```
+
+Reduce vertical whitespace with smaller margins and tighter line spacing:
+
+```bash
+$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-margin 4 --text-line-spacing 1.0
+$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-top-margin 0 --text-bottom-margin 0
+```
+
+Make text heavier:
+
+```bash
+$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-thickness 5
+```
+
+Reduce the paper feed after printing. Do not set it too low if the last line
+does not fully leave the print head:
+
+```bash
+$ ./print.py --text "YOU GOT HACKED" --feed 8
+$ ./print.py --text "YOU GOT HACKED" --feed 0
+```
+
+If your printer still leaves a gap between separate print jobs, also reduce the
+number of repeated tail-feed commands:
+
+```bash
+$ ./print.py --text "YOU GOT HACKED" --feed 0 --feed-repeats 0 --finish-feed 0
+```
+
 
 # Different Algorithms
 
@@ -82,3 +132,4 @@ options:
 **None (image must be 384px wide):**
 
 ![None](./media/grumpynone.png)
+# catPrinter
