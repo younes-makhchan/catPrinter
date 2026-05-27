@@ -38,6 +38,13 @@ def convert_image_to_packed(image_path, width=384, density=65):
         img = Image.open(image_path)
         print(f"[*] Loaded: {image_path} ({img.size})")
         
+        # Auto-rotate: if landscape (width > height), rotate 90° for vertical printing
+        if img.size[0] > img.size[1]:
+            img = img.rotate(90, expand=True)
+            print(f"[*] Landscape detected → Rotated 90° → {img.size}")
+        else:
+            print(f"[*] Portrait orientation → No rotation")
+        
         # Resize to width (preserve aspect ratio)
         aspect_ratio = img.size[1] / img.size[0]
         target_height = int(width * aspect_ratio)
