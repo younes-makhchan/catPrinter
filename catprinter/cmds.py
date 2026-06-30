@@ -1,5 +1,6 @@
 
 PRINT_WIDTH = 384
+DEFAULT_FEED_AMOUNT = 0
 
 
 def to_unsigned_byte(val):
@@ -185,7 +186,11 @@ def cmd_print_row(img_row):
     return b_arr
 
 
-def cmds_print_img(img, energy: int = 0xffff):
+def cmds_print_img(
+    img,
+    energy: int = 0xffff,
+    include_end_paper_commands: bool = True,
+):
     data = \
         CMD_GET_DEV_STATE + \
         CMD_SET_QUALITY_200_DPI + \
@@ -194,11 +199,13 @@ def cmds_print_img(img, energy: int = 0xffff):
         CMD_LATTICE_START
     for row in img:
         data += cmd_print_row(row)
-    data += \
-        cmd_feed_paper(25) + \
-        CMD_SET_PAPER + \
-        CMD_SET_PAPER + \
-        CMD_SET_PAPER + \
-        CMD_LATTICE_END + \
-        CMD_GET_DEV_STATE
+    if DEFAULT_FEED_AMOUNT:
+        data += cmd_feed_paper(DEFAULT_FEED_AMOUNT)
+    # Command 0xA5 is not fully understood. The stock sequence sends it three
+    # times after every print and some printer models appear to advance paper
+    # at this point. Keep it on by default, but allow an isolated diagnostic
+    # print without these frames.
+    if include_end_paper_commands:
+        data += CMD_SET_PAPER + CMD_SET_PAPER + CMD_SET_PAPER
+    data += CMD_LATTICE_END + CMD_GET_DEV_STATE
     return data

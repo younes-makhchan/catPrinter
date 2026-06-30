@@ -1,0 +1,99 @@
+:root {
+  color: #242023;
+  background: #f8efd8;
+  font-family: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background:
+    radial-gradient(circle at 10% 5%, #fff9e9 0 11%, transparent 11.2%),
+    radial-gradient(circle at 95% 20%, #ffd8a8 0 12%, transparent 12.2%),
+    #f8efd8;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.app-shell {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 1280px);
+  min-height: 100vh;
+  margin: 0 auto;
+  gap: 24px;
+  align-items: stretch;
+  padding: 20px;
+}
+.screen { width: 100%; min-height: min(760px, calc(100vh - 40px)); }
+
+.talk-card, .image-card {
+  border: 3px solid #242023;
+  border-radius: 26px;
+  box-shadow: 7px 7px 0 #242023;
+}
+.talk-card, .image-card { padding: clamp(22px, 5vw, 44px); }
+.talk-card { display: flex; flex-direction: column; background: #ff6b43; }
+.image-card { background: #fffaf0; }
+
+.section-heading { display: flex; align-items: center; gap: 10px; }
+.step { display: grid; width: 29px; height: 29px; place-items: center; border: 2px solid currentColor; border-radius: 50%; font-size: .73rem; font-weight: 900; }
+h2 { margin: 0; font-size: 1.16rem; letter-spacing: -.035em; }
+
+.talk-button {
+  position: relative;
+  display: grid;
+  width: min(100%, 280px);
+  aspect-ratio: 1;
+  place-items: center;
+  margin: auto;
+  overflow: hidden;
+  color: #242023;
+  background: #fffaf0;
+  border: 3px solid #242023;
+  border-radius: 50%;
+  box-shadow: 0 8px 0 #242023;
+  font-size: 1.18rem;
+  font-weight: 900;
+  touch-action: none;
+  user-select: none;
+}
+.talk-button:active, .talk-button.listening { transform: translateY(7px); box-shadow: 0 1px 0 #242023; }
+.talk-button.listening { background: #ffe047; }
+.talk-button:disabled { cursor: wait; opacity: .72; }
+.button-icon { display: block; color: #ff643f; font-size: 5.2rem; line-height: .6; }
+.button-rings { position: absolute; width: 68%; aspect-ratio: 1; border: 2px dashed #ff643f; border-radius: 50%; opacity: 0; }
+.talk-button.listening .button-rings { opacity: 1; animation: pulse 1.15s infinite ease-in-out; }
+@keyframes pulse { 50% { transform: scale(1.13); opacity: .35; } }
+
+.status, .print-status { min-height: 1.4em; margin: 20px 0 0; text-align: center; font-size: .93rem; font-weight: 800; }
+
+.heard-prompt { position: absolute; z-index: 2; max-width: 28rem; margin: 0; padding: 26px; text-align: center; font-family: Georgia, serif; font-size: clamp(1.3rem, 5vw, 2rem); line-height: 1.25; }
+.heard-prompt::before { content: "“"; color: #ff643f; font-size: 1.6em; line-height: 0; }
+.heard-prompt::after { content: "”"; color: #ff643f; font-size: 1.6em; line-height: 0; }
+.preview-frame { position: relative; display: grid; min-height: calc(min(760px, 100vh - 40px) - 150px); margin-top: 24px; place-items: center; overflow: hidden; border: 2px solid #242023; border-radius: 17px; background-color: #fff; background-image: radial-gradient(#dad1c3 1px, transparent 1px); background-size: 12px 12px; }
+.empty-preview { color: #796c67; text-align: center; font-family: Georgia, serif; }
+.spark { position: absolute; color: #ff643f; font-family: sans-serif; font-size: 2.2rem; }
+.spark-one { margin: -55px 0 0 -100px; }.spark-two { margin: 32px -120px 0 0; color: #ffe047; }
+#sticker-preview { display: block; width: 100%; max-height: 520px; object-fit: contain; background: #fff; }
+.thinking-mark { position: absolute; z-index: 3; display: grid; gap: 8px; place-items: center; inset: 0; background: rgb(255 250 240 / .88); font-weight: 900; }
+.thinking-dots { display: flex; gap: 8px; align-items: center; }
+.thinking-mark span { display: block; width: 13px; height: 13px; border-radius: 50%; background: #ff643f; animation: bounce .7s infinite alternate; }
+.thinking-mark span:nth-child(2) { animation-delay: .15s; }.thinking-mark span:nth-child(3) { animation-delay: .3s; }
+.thinking-mark p { margin: 2px 0 0; }
+@keyframes bounce { to { transform: translateY(-10px); } }
+
+@media (max-height: 640px) {
+  .screen { min-height: calc(100vh - 24px); }
+  .app-shell { padding: 12px; }
+  .talk-button { width: min(56vh, 280px); }
+}
+
+@media (max-width: 760px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .screen { min-height: calc(100vh - 40px); }
+}

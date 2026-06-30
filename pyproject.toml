@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "catprinter"
+version = "0.1.0"
+description = "Print images to a Cat thermal printer over Bluetooth Low Energy"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "bleak~=0.14.2",
+  "numpy<2.0",
+  "opencv-python<5.0",
+  "pillow>=9.1",
+  "requests>=2.31",
+  "flask>=3.0",
+]
+
+[tool.setuptools]
+packages = ["catprinter"]
+
+[tool.setuptools.package-data]
+catprinter = ["templates/*.html", "static/*.css", "static/*.js"]
+
+# uv uses this as its default index. pip already defaults to public PyPI and
+# needs no index configuration.
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true

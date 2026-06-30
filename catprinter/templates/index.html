@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ff6b43">
+    <title>Sticker Press</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stickerbox.css') }}">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="talk-screen" class="screen talk-card" aria-labelledby="talk-title">
+        <div class="section-heading">
+          <span class="step">01</span>
+          <h2 id="talk-title">Say your idea</h2>
+        </div>
+        <button id="talk-button" class="talk-button" type="button" aria-describedby="status" aria-label="Hold to speak">
+          <span class="button-rings" aria-hidden="true"></span>
+          <span class="button-icon" aria-hidden="true">●</span>
+          <span id="button-label">Press to talk</span>
+        </button>
+        <p id="status" class="status" aria-live="polite">Press and hold. Release when you are done.</p>
+      </section>
+
+      <section id="sticker-screen" class="screen image-card" aria-labelledby="image-title">
+        <div class="section-heading">
+          <span class="step">02</span>
+          <h2 id="image-title">Your sticker</h2>
+        </div>
+        <div id="preview-frame" class="preview-frame" data-state="empty">
+          <div class="empty-preview">
+            <span class="spark spark-one">✦</span>
+            <span class="spark spark-two">✷</span>
+            <p id="empty-message">Press to talk</p>
+          </div>
+          <img id="sticker-preview" alt="Generated sticker preview" hidden>
+          <p id="heard-prompt" class="heard-prompt" hidden></p>
+          <div id="thinking-mark" class="thinking-mark" hidden>
+            <div class="thinking-dots" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <p>Thinking…</p>
+          </div>
+        </div>
+        <p id="print-status" class="print-status" aria-live="polite"></p>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='stickerbox.js') }}"></script>
+  </body>
+</html>

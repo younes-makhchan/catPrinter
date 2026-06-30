@@ -1,12 +1,12 @@
 import asyncio
 import contextlib
+import sys
 import uuid
 from typing import Optional
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.scanner import AdvertisementData
 from bleak.backends.device import BLEDevice
-from bleak.backends.bluezdbus.client import BleakClientBlueZDBus
 from catprinter import logger
 
 # For some reason, bleak reports the 0xaf30 service on my macOS, while it reports
@@ -97,10 +97,13 @@ async def run_ble(data, device: Optional[str]):
         return
     logger.info(f"⏳ Connecting to {address}...")
     async with BleakClient(address) as client:
-        # XXX: BlueZ incorrectly reports a fixed MTU of 23; force MTU negotiation manually.
-        # https://bleak.readthedocs.io/en/latest/api/client.html#bleak.BleakClient.mtu_size
-        if isinstance(client, BleakClientBlueZDBus):
-            await client._acquire_mtu()
+        # BlueZ incorrectly reports a fixed MTU of 23; force MTU negotiation on
+        # Linux only. Importing this backend on macOS requires Linux's D-Bus
+        # dependency and prevents the CoreBluetooth backend from starting.
+        if sys.platform.startswith('linux'):
+            from bleak.backends.bluezdbus.client import BleakClientBlueZDBus
+            if isinstance(client, BleakClientBlueZDBus):
+                await client._acquire_mtu()
 
         logger.info(f"✅ Connected: {client.is_connected}; MTU: {client.mtu_size}")
         chunk_size = client.mtu_size - 3

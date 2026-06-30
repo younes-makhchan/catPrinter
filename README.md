@@ -9,11 +9,11 @@ This repository contains Python code for talking to the cat printer over Bluetoo
 # Clone the repository.
 $ git clone git@github.com:rbaron/catprinter.git
 $ cd catprinter
-# Create a virtualenv on venv/ and activate it.
-$ virtualenv --python=python3 venv
+# Create a Python 3.10+ virtualenv and activate it.
+$ python3.10 -m venv venv
 $ source venv/bin/activate
-# Install requirements from requirements.txt.
-$ pip install -r requirements.txt
+# Install the project dependencies from pyproject.toml.
+$ pip install .
 ```
 
 # Usage
@@ -61,56 +61,95 @@ options:
 
 # Text Printing
 
-Text can be rendered directly to the printer bitmap without ImageMagick:
+Text can be rendered directly to the printer bitmap with Pillow; ImageMagick is
+not required:
 
 ```bash
 $ ./print.py --text "YOU GOT HACKED" --text-size 40
 ```
 
+# AI Illustration Printing
+
+Generate a playful black-and-white cartoon illustration with Pollinations Flux,
+inspect the exact printer bitmap, then approve it before it is sent to the
+printer. AI jobs use a direct black/white cutoff by default, so they do not add
+Floyd-Steinberg dither dots. AI jobs always require approval, even without
+`--show-preview`.
+
+```bash
+$ ./print.py --ai "A happy cat riding a bicycle through a small town"
+```
+
+Set `POLLINATIONS_API_KEY` to use your own Pollinations account and credits.
+If it is unset, the command uses Pollinations' public endpoint, which can have
+stricter availability and rate limits.
+
+Flux is the default model. Choose another Pollinations image model with
+`--ai-model`:
+
+```bash
+$ ./print.py --ai-model flux --ai "A cheerful robot walking a dog"
+```
+
+The generated image stays in memory and is not written to disk. Use
+`--threshold` to make the final thermal-printer conversion lighter or darker.
+
+# Voice Sticker Web UI
+
+The project also includes a small StickerBox-inspired local web UI. Hold
+the on-screen button while speaking, release it to transcribe and generate an
+illustration, then the preview is shown before it is sent directly to the
+Bluetooth printer.
+
+Install the web-server dependency, start the server, then open the address in
+Chrome on the same phone:
+
+```bash
+$ uv sync
+$ .venv/bin/python -m catprinter.server --device <address-or-name>
+# Open http://127.0.0.1:5000
+```
+
+The browser asks for microphone permission the first time. Chrome's built-in
+speech recognition is used for the hold-to-talk interaction; if it is not
+available, the UI provides a text field instead. Use `127.0.0.1` on the phone
+rather than a LAN address: browsers allow microphone access on localhost over
+HTTP, whereas an ordinary HTTP LAN page may require HTTPS.
+
 Useful options:
 
 ```bash
 $ ./print.py --text "hello" --text-align center --text-margin 16
-$ ./print.py --text "fast test" --device <address-or-name> --chunk-delay 0.01
+$ ./print.py --text "fast test" --device <address-or-name>
 ```
 
-To inspect the generated bitmap bounds before printing, use the preview with a
-debug border:
+Use the preview to inspect the generated bitmap before printing:
 
 ```bash
-$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-border --show-preview
+$ ./print.py --text "YOU GOT HACKED" --text-size 40 --show-preview
 ```
 
-Reduce vertical whitespace with smaller margins and tighter line spacing:
+Reduce whitespace with a smaller margin:
 
 ```bash
-$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-margin 4 --text-line-spacing 1.0
-$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-top-margin 0 --text-bottom-margin 0
+$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-margin 4
 ```
-
-Make text heavier:
-
-```bash
-$ ./print.py --text "YOU GOT HACKED" --text-size 40 --text-thickness 5
-```
-
-Reduce the paper feed after printing. Do not set it too low if the last line
-does not fully leave the print head:
-
-```bash
-$ ./print.py --text "YOU GOT HACKED" --feed 8
-$ ./print.py --text "YOU GOT HACKED" --feed 0
-```
-
-If your printer still leaves a gap between separate print jobs, also reduce the
-number of repeated tail-feed commands:
-
-```bash
-$ ./print.py --text "YOU GOT HACKED" --feed 0 --feed-repeats 0 --finish-feed 0
-```
-
 
 # Different Algorithms
+
+Use `--threshold` to control how much of an image becomes black. `50` is the
+default midpoint; higher values print darker, and lower values print lighter:
+
+```bash
+$ ./print.py --threshold 65 --show-preview photo.jpg
+```
+
+For clean black-and-white line art without dither dots, use a fixed cutoff. A
+lower threshold removes more light-gray background detail:
+
+```bash
+$ ./print.py --img-binarization-algo fixed-threshold --threshold 40 --show-preview photo.jpg
+```
 
 **Mean Threshold:**
 
