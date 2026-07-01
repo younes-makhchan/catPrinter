@@ -40,7 +40,7 @@ def print_demo_image(image_path, printer_device):
         "fixed-threshold",
         threshold_percent=50,
     )
-    commands = cmds_print_img(bin_img, include_end_paper_commands=False)
+    commands = cmds_print_img(bin_img)
     asyncio.run(run_ble(commands, device=printer_device))
 
 
@@ -99,4 +99,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

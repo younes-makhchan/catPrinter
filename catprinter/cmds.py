@@ -201,11 +201,10 @@ def cmds_print_img(
         data += cmd_print_row(row)
     if DEFAULT_FEED_AMOUNT:
         data += cmd_feed_paper(DEFAULT_FEED_AMOUNT)
-    # Command 0xA5 is not fully understood. The stock sequence sends it three
-    # times after every print and some printer models appear to advance paper
-    # at this point. Keep it on by default, but allow an isolated diagnostic
-    # print without these frames.
+    # Command 0xA5 is not fully understood. It appears to advance paper on some
+    # printer models. Keep one frame by default, but allow an isolated
+    # diagnostic print without it.
     if include_end_paper_commands:
-        data += CMD_SET_PAPER + CMD_SET_PAPER + CMD_SET_PAPER
+        data += CMD_SET_PAPER
     data += CMD_LATTICE_END + CMD_GET_DEV_STATE
     return data

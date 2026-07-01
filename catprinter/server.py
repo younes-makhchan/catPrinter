@@ -10,6 +10,7 @@ import time
 import uuid
 
 from flask import Flask, jsonify, render_template, request, send_file
+import numpy as np
 from PIL import Image
 
 from catprinter.ai import generate_image
@@ -23,7 +24,7 @@ PRINT_ENERGY = 0xFFFF
 PRINT_THRESHOLD = 50
 TOP_MARGIN = 0
 BOTTOM_MARGIN = 0
-INCLUDE_END_PAPER_COMMANDS = False
+INCLUDE_END_PAPER_COMMANDS = True
 STICKER_JOBS = {}
 MAX_STICKER_JOBS = 12
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +67,7 @@ def prepare_image_for_print(image_bytes):
 def print_image_bytes(image_bytes):
     """Use the same BLE command generation and Bluetooth transport as print.py."""
     bin_img = prepare_image_for_print(image_bytes)
+    bin_img = np.flipud(np.asarray(bin_img, dtype=bool))
     data = cmds_print_img(
         bin_img,
         energy=PRINT_ENERGY,
@@ -194,8 +196,8 @@ def parse_args():
                         help='Blank printer rows before each sticker (default: 0)')
     parser.add_argument('--bottom-margin', type=int, default=0,
                         help='Blank printer rows after each sticker (default: 0)')
-    parser.add_argument('--include-end-paper-commands', action='store_true',
-                        help='Send the three end-paper commands that advance paper on some printers')
+    parser.add_argument('--skip-end-paper-commands', action='store_true',
+                        help='Do not send the three end-paper commands that advance paper on some printers')
     return parser.parse_args()
 
 
@@ -211,7 +213,7 @@ if __name__ == '__main__':
     PRINT_THRESHOLD = args.threshold
     TOP_MARGIN = args.top_margin
     BOTTOM_MARGIN = args.bottom_margin
-    INCLUDE_END_PAPER_COMMANDS = args.include_end_paper_commands
+    INCLUDE_END_PAPER_COMMANDS = not args.skip_end_paper_commands
 
     print(f"""
 Sticker Press is ready.
