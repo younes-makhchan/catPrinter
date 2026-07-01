@@ -5,10 +5,11 @@ import argparse
 import asyncio
 import base64
 from io import BytesIO
+from pathlib import Path
 import time
 import uuid
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 from PIL import Image
 
 from catprinter.ai import generate_image
@@ -25,6 +26,9 @@ BOTTOM_MARGIN = 0
 INCLUDE_END_PAPER_COMMANDS = False
 STICKER_JOBS = {}
 MAX_STICKER_JOBS = 12
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEMO_IMAGE = PROJECT_ROOT / 'firmware' / 'data' / 'demo.jpg'
+THINKING_AUDIO = PROJECT_ROOT / 'thinking.mp3'
 
 
 def image_bytes_to_data_url(image_bytes):
@@ -71,6 +75,12 @@ def print_image_bytes(image_bytes):
     return (len(bin_img), PRINT_WIDTH), len(data)
 
 
+def read_demo_image_bytes():
+    if not DEMO_IMAGE.is_file():
+        raise RuntimeError(f'Demo image not found: {DEMO_IMAGE}')
+    return DEMO_IMAGE.read_bytes()
+
+
 def send_print_data(data):
     """Load BLE only when printing, so the local web UI starts immediately."""
     from catprinter.ble import run_ble
@@ -80,6 +90,20 @@ def send_print_data(data):
 @app.route('/', methods=['GET'])
 def stickerbox_ui():
     return render_template('index.html')
+
+
+@app.route('/thinking.mp3', methods=['GET'])
+def thinking_audio():
+    if not THINKING_AUDIO.is_file():
+        return jsonify({'error': f'Thinking audio not found: {THINKING_AUDIO}'}), 404
+    return send_file(THINKING_AUDIO, mimetype='audio/mpeg')
+
+
+@app.route('/api/demo/image', methods=['GET'])
+def demo_image():
+    if not DEMO_IMAGE.is_file():
+        return jsonify({'error': f'Demo image not found: {DEMO_IMAGE}'}), 404
+    return send_file(DEMO_IMAGE)
 
 
 @app.route('/api/stickers', methods=['POST'])
@@ -129,6 +153,23 @@ def print_sticker(job_id):
     except Exception as error:
         print(f"[-] Sticker print failed: {error}")
         return jsonify({'error': f'Could not print the sticker: {error}'}), 502
+
+
+@app.route('/api/demo/print', methods=['POST'])
+def print_demo():
+    """Print the LittleFS demo image when the ESP32 asks over Web Serial."""
+    try:
+        print('[>>] Printing ESP32 demo image over Bluetooth...')
+        image_shape, command_length = print_image_bytes(read_demo_image_bytes())
+        print('[+] Demo image printed!')
+        return jsonify({
+            'status': 'printed',
+            'dimensions': f'{image_shape[1]}x{image_shape[0]}',
+            'command_bytes': command_length,
+        })
+    except Exception as error:
+        print(f'[-] Demo print failed: {error}')
+        return jsonify({'error': f'Could not print the demo image: {error}'}), 502
 
 
 @app.route('/status', methods=['GET'])

@@ -14,6 +14,8 @@
           <span class="step">01</span>
           <h2 id="talk-title">Say your idea</h2>
         </div>
+        <button id="serial-connect" class="serial-connect" type="button">Connect ESP32</button>
+        <p id="serial-status" class="serial-status" aria-live="polite">ESP32 not connected</p>
         <button id="talk-button" class="talk-button" type="button" aria-describedby="status" aria-label="Hold to speak">
           <span class="button-rings" aria-hidden="true"></span>
           <span class="button-icon" aria-hidden="true">●</span>
@@ -45,6 +47,7 @@
         <p id="print-status" class="print-status" aria-live="polite"></p>
       </section>
     </main>
+    <audio id="thinking-audio" src="/thinking.mp3" preload="auto" loop></audio>
     <script src="{{ url_for('static', filename='stickerbox.js') }}"></script>
   </body>
 </html>

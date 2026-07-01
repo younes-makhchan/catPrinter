@@ -28,8 +28,9 @@ module specification.
 3. Releasing it shows `Thinking...` for two seconds.
 4. The simulated transcript `six,seven` appears.
 5. `/demo.jpg` is loaded from LittleFS and displayed.
-6. The firmware sends `PRINT_DEMO` to the laptop.
-7. `demo_bridge.py` prints the same image to PD01 over BLE.
+6. The firmware sends `PRINT_DEMO` over USB serial.
+7. The web UI receives that event through Web Serial and asks the local server
+   to print the same image to PD01 over BLE.
 
 ## Upload
 
@@ -44,17 +45,14 @@ pio run -d firmware --target uploadfs
 To replace the demo, overwrite `firmware/data/demo.jpg` with a baseline 24-bit JPEG
 and rerun only `uploadfs`. Progressive JPEG files are not supported by TJpg_Decoder.
 
-## Run the laptop bridge
+## Run the web bridge
 
-Install Python dependencies and start the bridge:
+Install Python dependencies and start the web server:
 
 ```bash
 uv sync
-.venv/bin/python demo_bridge.py
+.venv/bin/python -m catprinter.server --device 230BD164-E303-D0B1-7476-F83BB4E81722
 ```
 
-The bridge auto-detects the ESP32 serial port. Override it when necessary:
-
-```bash
-.venv/bin/python demo_bridge.py --port /dev/cu.usbmodem101
-```
+Open `http://127.0.0.1:5000` in Chrome or Edge, click `Connect ESP32`, and pick
+the ESP32 serial device. Keep that tab open while using the physical button.

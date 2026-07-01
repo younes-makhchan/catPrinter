@@ -44,6 +44,21 @@ button { cursor: pointer; }
 .step { display: grid; width: 29px; height: 29px; place-items: center; border: 2px solid currentColor; border-radius: 50%; font-size: .73rem; font-weight: 900; }
 h2 { margin: 0; font-size: 1.16rem; letter-spacing: -.035em; }
 
+.serial-connect {
+  align-self: flex-start;
+  margin-top: 18px;
+  padding: 10px 14px;
+  color: #242023;
+  background: #fffaf0;
+  border: 2px solid #242023;
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 #242023;
+  font-size: .88rem;
+  font-weight: 900;
+}
+.serial-connect:disabled { opacity: .78; cursor: default; }
+.serial-status { min-height: 1.2em; margin: 10px 0 0; font-size: .78rem; font-weight: 900; }
+
 .talk-button {
   position: relative;
   display: grid;

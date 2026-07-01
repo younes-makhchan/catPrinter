@@ -102,7 +102,7 @@ illustration, then the preview is shown before it is sent directly to the
 Bluetooth printer.
 
 Install the web-server dependency, start the server, then open the address in
-Chrome on the same phone:
+Chrome or Edge on the laptop:
 
 ```bash
 $ uv sync
@@ -112,16 +112,17 @@ $ .venv/bin/python -m catprinter.server --device <address-or-name>
 
 The browser asks for microphone permission the first time. Chrome's built-in
 speech recognition is used for the hold-to-talk interaction; if it is not
-available, the UI provides a text field instead. Use `127.0.0.1` on the phone
-rather than a LAN address: browsers allow microphone access on localhost over
-HTTP, whereas an ordinary HTTP LAN page may require HTTPS.
+available, the UI provides a text field instead. Use `127.0.0.1` on the laptop:
+browsers allow microphone and Web Serial access on localhost over HTTP, whereas
+an ordinary HTTP LAN page may require HTTPS and may not expose serial access.
 
-# ESP32-S3 Physical Demo
+# ESP32 Physical Demo
 
 An emulated hardware demo lives in `firmware/`. A physical button drives the same
-listening, thinking, transcript, and image sequence on an SPI display. The laptop
-bridge in `demo_bridge.py` receives the final serial event and prints the LittleFS
-demo image to PD01 over Bluetooth. See `firmware/README.md` for wiring and commands.
+listening, thinking, transcript, and image sequence on an SPI display. The web UI
+can connect to the ESP32 over Web Serial, receive the final `PRINT_DEMO` event,
+and print the LittleFS demo image to PD01 over Bluetooth through the local server.
+See `firmware/README.md` for wiring and commands.
 
 Useful options:
 
