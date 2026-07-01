@@ -15,6 +15,7 @@ dependencies = [
   "pillow>=9.1",
   "requests>=2.31",
   "flask>=3.0",
+  "pyserial>=3.5",
 ]
 
 [tool.setuptools]

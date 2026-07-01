@@ -90,11 +90,7 @@ async def wait_for_printer_ready(event):
 
 
 async def run_ble(data, device: Optional[str]):
-    try:
-        address = await get_device_address(device)
-    except RuntimeError as e:
-        logger.error(f"🛑 {e}")
-        return
+    address = await get_device_address(device)
     logger.info(f"⏳ Connecting to {address}...")
     async with BleakClient(address) as client:
         # BlueZ incorrectly reports a fixed MTU of 23; force MTU negotiation on
@@ -125,4 +121,6 @@ async def run_ble(data, device: Optional[str]):
                 wait_for_printer_ready(event), timeout=WAIT_FOR_PRINTER_DONE_TIMEOUT
             )
         except asyncio.TimeoutError:
-            logger.error("🛑 Timed out while waiting for printer done event. Exiting.")
+            raise RuntimeError(
+                "Timed out while waiting for the printer-ready notification"
+            )

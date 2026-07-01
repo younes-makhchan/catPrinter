@@ -116,6 +116,13 @@ available, the UI provides a text field instead. Use `127.0.0.1` on the phone
 rather than a LAN address: browsers allow microphone access on localhost over
 HTTP, whereas an ordinary HTTP LAN page may require HTTPS.
 
+# ESP32-S3 Physical Demo
+
+An emulated hardware demo lives in `firmware/`. A physical button drives the same
+listening, thinking, transcript, and image sequence on an SPI display. The laptop
+bridge in `demo_bridge.py` receives the final serial event and prints the LittleFS
+demo image to PD01 over Bluetooth. See `firmware/README.md` for wiring and commands.
+
 Useful options:
 
 ```bash

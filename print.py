@@ -164,7 +164,10 @@ def main():
     logger.info(f'✅ Generated BLE commands: {len(data)} bytes')
 
     # Connect directly to the configured printer UUID by default.
-    asyncio.run(run_ble(data, device=args.device))
+    try:
+        asyncio.run(run_ble(data, device=args.device))
+    except RuntimeError as error:
+        logger.error(f'🛑 {error}')
 
 
 if __name__ == '__main__':
