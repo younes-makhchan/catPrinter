@@ -1,0 +1,7 @@
+bleak~=0.14.2
+numpy<2.0
+opencv-python<5.0
+pillow>=9.1
+requests>=2.31
+flask>=3.0
+pyserial>=3.5
