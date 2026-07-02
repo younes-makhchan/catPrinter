@@ -17,6 +17,10 @@ constexpr int16_t TRANSCRIPT_Y = 16;
 constexpr int16_t TRANSCRIPT_LINE_GAP = 78;
 constexpr uint8_t TRANSCRIPT_TEXT_SIZE = 3;
 constexpr uint8_t TRANSCRIPT_FONT = 4;
+constexpr int16_t STATUS_CARD_WIDTH = 230;
+constexpr int16_t STATUS_CARD_HEIGHT = 74;
+constexpr int16_t STATUS_PATTERN_X_STEP = 62;
+constexpr int16_t STATUS_PATTERN_Y_STEP = 72;
 
 TFT_eSPI display;
 
@@ -43,17 +47,31 @@ void drawBlackBorder(int16_t x, int16_t y, int16_t width, int16_t height) {
   display.drawRect(x + 1, y + 1, width - 2, height - 2, TFT_BLACK);
 }
 
-void showStatusCard(const String &title, uint16_t background) {
-  display.fillScreen(background);
-
-  const int16_t size = min(display.width(), display.height()) - 44;
-  const int16_t x = (display.width() - size) / 2;
-  const int16_t y = (display.height() - size) / 2;
-
-  display.fillRect(x, y, size, size, TFT_WHITE);
-  drawBlackBorder(x, y, size, size);
+void drawStatusPattern(const String &symbol, uint16_t color) {
   display.setTextDatum(MC_DATUM);
-  display.setTextColor(TFT_BLACK, TFT_WHITE);
+  display.setTextColor(color);
+  display.setTextSize(1);
+  for (int16_t y = 28; y < display.height(); y += STATUS_PATTERN_Y_STEP) {
+    for (int16_t x = 38; x < display.width(); x += STATUS_PATTERN_X_STEP) {
+      display.drawString(symbol, x, y, 4);
+    }
+  }
+}
+
+void showStatusCard(const String &title, uint16_t background, const String &symbol,
+                    uint16_t symbolColor) {
+  display.fillScreen(background);
+  drawStatusPattern(symbol, symbolColor);
+
+  const int16_t width = min<int16_t>(STATUS_CARD_WIDTH, display.width() - 34);
+  const int16_t height = min<int16_t>(STATUS_CARD_HEIGHT, display.height() - 34);
+  const int16_t x = (display.width() - width) / 2;
+  const int16_t y = (display.height() - height) / 2;
+
+  display.fillRect(x, y, width, height, display.color565(235, 252, 255));
+  drawBlackBorder(x, y, width, height);
+  display.setTextDatum(MC_DATUM);
+  display.setTextColor(TFT_BLACK, display.color565(235, 252, 255));
   display.setTextSize(1);
   display.drawString(title, display.width() / 2, display.height() / 2, 4);
 }
@@ -154,14 +172,26 @@ void enterState(DemoState next) {
 
   switch (state) {
     case DemoState::Idle:
-      showStatusCard("Press to talk", display.color565(255, 218, 222));
+      showStatusCard(
+          "Press to talk",
+          display.color565(244, 214, 218),
+          "?",
+          display.color565(145, 78, 86));
       break;
     case DemoState::Listening:
-      showStatusCard("Listening...", display.color565(230, 220, 255));
+      showStatusCard(
+          "Listening...",
+          display.color565(226, 216, 246),
+          "!",
+          display.color565(112, 84, 158));
       Serial.println("START_LISTENING");
       break;
     case DemoState::Thinking:
-      showStatusCard("Thinking...", display.color565(255, 245, 175));
+      showStatusCard(
+          "Thinking...",
+          display.color565(255, 243, 178),
+          "!",
+          display.color565(158, 126, 35));
       Serial.println("STOP_LISTENING");
       break;
     case DemoState::Transcript:
