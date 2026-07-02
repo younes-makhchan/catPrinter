@@ -41,6 +41,8 @@ String laptopMessage;
 String demoTranscript = "six,seven";
 uint32_t thinkingMs = 2000;
 uint32_t transcriptMs = 1800;
+String printStatusText;
+uint16_t printStatusColor = TFT_BLACK;
 
 void drawBlackBorder(int16_t x, int16_t y, int16_t width, int16_t height) {
   display.drawRect(x, y, width, height, TFT_BLACK);
@@ -134,6 +136,14 @@ void showPrintOverlay(const String &text, uint16_t color = TFT_BLACK) {
   display.drawString(text, display.width() / 2, y + height / 2, 2);
 }
 
+void setPrintStatus(const String &text, uint16_t color = TFT_BLACK) {
+  printStatusText = text;
+  printStatusColor = color;
+  if (state == DemoState::Image) {
+    showPrintOverlay(printStatusText, printStatusColor);
+  }
+}
+
 bool jpegBlock(int16_t x, int16_t y, uint16_t width, uint16_t height,
                uint16_t *pixels) {
   if (y >= display.height()) {
@@ -179,6 +189,7 @@ void enterState(DemoState next) {
           display.color565(145, 78, 86));
       break;
     case DemoState::Listening:
+      printStatusText = "";
       showStatusCard(
           "Listening...",
           display.color565(226, 216, 246),
@@ -193,13 +204,17 @@ void enterState(DemoState next) {
           "!",
           display.color565(158, 126, 35));
       Serial.println("STOP_LISTENING");
+      Serial.println("PRINT_DEMO");
       break;
     case DemoState::Transcript:
       showTranscript();
       break;
     case DemoState::Image:
       showDemoImage();
-      Serial.println("PRINT_DEMO");
+      Serial.println("SHOW_IMAGE");
+      if (!printStatusText.isEmpty()) {
+        showPrintOverlay(printStatusText, printStatusColor);
+      }
       break;
   }
 }
@@ -255,13 +270,13 @@ void handleLaptopMessage(const String &message) {
     transcriptMs = parseStageMs(message.substring(18), transcriptMs);
     Serial.println("ACK:CFG_TRANSCRIPT_MS");
   } else if (message == "PRINTING") {
-    showPrintOverlay("Printing...");
+    setPrintStatus("Printing...");
     Serial.println("ACK:PRINTING");
   } else if (message == "PRINT_OK") {
-    showPrintOverlay("Printed");
+    setPrintStatus("Printed");
     Serial.println("ACK:PRINT_OK");
   } else if (message.startsWith("PRINT_ERROR")) {
-    showPrintOverlay("Print failed", TFT_RED);
+    setPrintStatus("Print failed", TFT_RED);
     Serial.println("ACK:PRINT_ERROR");
   }
 }

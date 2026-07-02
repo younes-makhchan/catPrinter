@@ -29,6 +29,7 @@
   let serialWriter;
   let serialReadBuffer = '';
   let demoTranscriptTimer;
+  let demoPrintStatus = '';
 
   const demoConfig = {
     text: 'six,seven',
@@ -167,12 +168,7 @@
   async function printDemoImage() {
     if (isBusy) return;
     setBusy(true);
-    clearDemoTimers();
-    stopThinkingSound();
-    preview.src = `/api/demo/image?t=${Date.now()}`;
-    showStage('image');
-    setStatus('ESP32 showed the image. Printing now.');
-    printStatus.textContent = 'Sending it to the printer...';
+    demoPrintStatus = 'Printing...';
     await sendSerialLine('PRINTING');
 
     try {
@@ -180,16 +176,24 @@
       const printedData = await printed.json();
       if (!printed.ok) throw new Error(printedData.error || 'The demo image could not print.');
       await sendSerialLine('PRINT_OK');
-      setStatus('Demo printed.');
-      printStatus.textContent = 'Printed';
+      demoPrintStatus = 'Printed';
     } catch (error) {
       await sendSerialLine(`PRINT_ERROR:${error.message}`);
-      setStatus('Demo print failed.');
-      printStatus.textContent = error.message;
+      demoPrintStatus = error.message;
     } finally {
+      if (!preview.hidden) printStatus.textContent = demoPrintStatus;
       setBusy(false);
       buttonLabel.textContent = 'Press to talk';
     }
+  }
+
+  function showHardwareImage() {
+    clearDemoTimers();
+    stopThinkingSound();
+    preview.src = `/api/demo/image?t=${Date.now()}`;
+    showStage('image');
+    setStatus('ESP32 showed the image.');
+    printStatus.textContent = demoPrintStatus || 'Printing...';
   }
 
   async function makeSticker(prompt) {
@@ -303,7 +307,9 @@
     } else if (line === 'STOP_LISTENING') {
       showHardwareThinking();
     } else if (line === 'PRINT_DEMO') {
-      await printDemoImage();
+      printDemoImage();
+    } else if (line === 'SHOW_IMAGE') {
+      showHardwareImage();
     }
   }
 
