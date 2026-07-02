@@ -184,17 +184,17 @@ void enterState(DemoState next) {
     case DemoState::Idle:
       showStatusCard(
           "Press to talk",
-          display.color565(244, 214, 218),
+          display.color565(226, 216, 246),
           "?",
-          display.color565(145, 78, 86));
+          display.color565(112, 84, 158));
       break;
     case DemoState::Listening:
       printStatusText = "";
       showStatusCard(
           "Listening...",
-          display.color565(226, 216, 246),
+          display.color565(244, 214, 218),
           "!",
-          display.color565(112, 84, 158));
+          display.color565(145, 78, 86));
       Serial.println("START_LISTENING");
       break;
     case DemoState::Thinking:
