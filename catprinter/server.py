@@ -70,7 +70,7 @@ def prepare_image_for_print(image_bytes):
 def print_image_bytes(image_bytes):
     """Use the same BLE command generation and Bluetooth transport as print.py."""
     bin_img = prepare_image_for_print(image_bytes)
-    bin_img = np.flipud(np.asarray(bin_img, dtype=bool))
+    bin_img = np.rot90(np.asarray(bin_img, dtype=bool), 2)
     data = cmds_print_img(
         bin_img,
         energy=PRINT_ENERGY,
