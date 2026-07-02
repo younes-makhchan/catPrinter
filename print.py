@@ -78,6 +78,8 @@ def parse_args():
     args.add_argument('--skip-end-paper-commands', action='store_true',
                       help='Diagnostic: omit the three undocumented end-of-print '
                            'paper-control commands. Use to test excess paper advance.')
+    args.add_argument('--chunk-delay-ms', type=float, default=5,
+                      help='Delay after each BLE write chunk in milliseconds (default: 5).')
     parsed = args.parse_args()
     input_count = sum(bool(value) for value in (parsed.filename, parsed.text, parsed.ai))
     if input_count != 1:
@@ -165,7 +167,11 @@ def main():
 
     # Connect directly to the configured printer UUID by default.
     try:
-        asyncio.run(run_ble(data, device=args.device))
+        asyncio.run(run_ble(
+            data,
+            device=args.device,
+            chunk_delay_s=max(0, args.chunk_delay_ms) / 1000,
+        ))
     except RuntimeError as error:
         logger.error(f'🛑 {error}')
 

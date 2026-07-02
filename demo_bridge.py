@@ -32,7 +32,7 @@ def find_esp32_port():
     return candidates[0].device
 
 
-def print_demo_image(image_path, printer_device):
+def print_demo_image(image_path, printer_device, chunk_delay_s):
     """Prepare and print the demo image through the existing BLE implementation."""
     bin_img = read_img(
         str(image_path),
@@ -41,7 +41,7 @@ def print_demo_image(image_path, printer_device):
         threshold_percent=50,
     )
     commands = cmds_print_img(bin_img)
-    asyncio.run(run_ble(commands, device=printer_device))
+    asyncio.run(run_ble(commands, device=printer_device, chunk_delay_s=chunk_delay_s))
 
 
 def send_line(connection, message):
@@ -56,6 +56,8 @@ def parse_args():
     parser.add_argument("--image", type=Path, default=DEFAULT_IMAGE)
     parser.add_argument("--device", default=DEFAULT_PRINTER_DEVICE,
                         help="Cat Printer BLE UUID or name")
+    parser.add_argument("--chunk-delay-ms", type=float, default=5,
+                        help="Delay after each BLE write chunk in milliseconds")
     return parser.parse_args()
 
 
@@ -88,7 +90,11 @@ def main():
 
             send_line(connection, "PRINTING")
             try:
-                print_demo_image(image_path, args.device)
+                print_demo_image(
+                    image_path,
+                    args.device,
+                    max(0, args.chunk_delay_ms) / 1000,
+                )
             except Exception as error:
                 print(f"Print failed: {error}", file=sys.stderr)
                 send_line(connection, f"PRINT_ERROR:{error}")

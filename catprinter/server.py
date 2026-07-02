@@ -19,9 +19,12 @@ from catprinter.cmds import PRINT_WIDTH, cmds_print_img
 
 app = Flask(__name__)
 
-PRINTER_DEVICE = ''
+DEFAULT_PRINTER_DEVICE = '230BD164-E303-D0B1-7476-F83BB4E81722'
+
+PRINTER_DEVICE = DEFAULT_PRINTER_DEVICE
 PRINT_ENERGY = 0xFFFF
 PRINT_THRESHOLD = 50
+PRINT_CHUNK_DELAY_S = 0.005
 TOP_MARGIN = 0
 BOTTOM_MARGIN = 0
 INCLUDE_END_PAPER_COMMANDS = True
@@ -86,7 +89,7 @@ def read_demo_image_bytes():
 def send_print_data(data):
     """Load BLE only when printing, so the local web UI starts immediately."""
     from catprinter.ble import run_ble
-    asyncio.run(run_ble(data, device=PRINTER_DEVICE))
+    asyncio.run(run_ble(data, device=PRINTER_DEVICE, chunk_delay_s=PRINT_CHUNK_DELAY_S))
 
 
 @app.route('/', methods=['GET'])
@@ -187,11 +190,14 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Voice-to-sticker web UI for a Cat Bluetooth printer')
     parser.add_argument('--host', default='127.0.0.1', help='Web server host (default: 127.0.0.1)')
     parser.add_argument('--port', type=int, default=5000, help='Web server port (default: 5000)')
-    parser.add_argument('-d', '--device', default='', help='Printer BLE address or name; auto-discover if omitted')
+    parser.add_argument('-d', '--device', default=DEFAULT_PRINTER_DEVICE,
+                        help=f'Printer BLE address or name (default: {DEFAULT_PRINTER_DEVICE})')
     parser.add_argument('-e', '--energy', type=lambda h: int(h.removeprefix('0x'), 16), default=0xFFFF,
                         help='Thermal energy in hex, e.g. 0xffff (default: 0xffff)')
     parser.add_argument('--threshold', type=float, default=50,
                         help='AI black/white cutoff percentage, 0-100 (default: 50)')
+    parser.add_argument('--chunk-delay-ms', type=float, default=5,
+                        help='Delay after each BLE write chunk in milliseconds (default: 5)')
     parser.add_argument('--top-margin', type=int, default=0,
                         help='Blank printer rows before each sticker (default: 0)')
     parser.add_argument('--bottom-margin', type=int, default=0,
@@ -211,6 +217,7 @@ if __name__ == '__main__':
     PRINTER_DEVICE = args.device
     PRINT_ENERGY = args.energy
     PRINT_THRESHOLD = args.threshold
+    PRINT_CHUNK_DELAY_S = max(0, args.chunk_delay_ms) / 1000
     TOP_MARGIN = args.top_margin
     BOTTOM_MARGIN = args.bottom_margin
     INCLUDE_END_PAPER_COMMANDS = not args.skip_end_paper_commands

@@ -16,6 +16,20 @@
         </div>
         <button id="serial-connect" class="serial-connect" type="button">Connect ESP32</button>
         <p id="serial-status" class="serial-status" aria-live="polite">ESP32 not connected</p>
+        <div class="demo-controls" aria-label="Demo timing controls">
+          <label>
+            <span>Text</span>
+            <input id="demo-text" type="text" value="six,seven" maxlength="48">
+          </label>
+          <label>
+            <span>Thinking ms</span>
+            <input id="thinking-ms" type="number" value="2000" min="250" max="10000" step="250">
+          </label>
+          <label>
+            <span>Text ms</span>
+            <input id="transcript-ms" type="number" value="1800" min="250" max="10000" step="250">
+          </label>
+        </div>
         <button id="talk-button" class="talk-button" type="button" aria-describedby="status" aria-label="Hold to speak">
           <span class="button-rings" aria-hidden="true"></span>
           <span class="button-icon" aria-hidden="true">●</span>

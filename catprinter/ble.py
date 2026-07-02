@@ -26,7 +26,7 @@ PRINTER_READY_NOTIFICATION = b"\x51\x78\xae\x01\x01\x00\x00\x00\xff"
 SCAN_TIMEOUT_S = 10
 
 # Wait time after sending each chunk of data through BLE.
-WAIT_AFTER_EACH_CHUNK_S = 0.02
+WAIT_AFTER_EACH_CHUNK_S = 0.005
 
 # Wait for printer done event timeout.
 WAIT_FOR_PRINTER_DONE_TIMEOUT = 30
@@ -89,7 +89,7 @@ async def wait_for_printer_ready(event):
     logger.info("✅ Printer is ready, disconnecting...")
 
 
-async def run_ble(data, device: Optional[str]):
+async def run_ble(data, device: Optional[str], chunk_delay_s: float = WAIT_AFTER_EACH_CHUNK_S):
     address = await get_device_address(device)
     logger.info(f"⏳ Connecting to {address}...")
     async with BleakClient(address) as client:
@@ -114,7 +114,8 @@ async def run_ble(data, device: Optional[str]):
         )
         for i, chunk in enumerate(chunkify(data, chunk_size)):
             await client.write_gatt_char(TX_CHARACTERISTIC_UUID, chunk)
-            await asyncio.sleep(WAIT_AFTER_EACH_CHUNK_S)
+            if chunk_delay_s:
+                await asyncio.sleep(chunk_delay_s)
 
         try:
             await asyncio.wait_for(

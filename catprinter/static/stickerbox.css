@@ -18,6 +18,7 @@ body {
 
 button, input { font: inherit; }
 button { cursor: pointer; }
+input { width: 100%; min-width: 0; }
 
 .app-shell {
   display: grid;
@@ -58,6 +59,23 @@ h2 { margin: 0; font-size: 1.16rem; letter-spacing: -.035em; }
 }
 .serial-connect:disabled { opacity: .78; cursor: default; }
 .serial-status { min-height: 1.2em; margin: 10px 0 0; font-size: .78rem; font-weight: 900; }
+.demo-controls {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr .8fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.demo-controls label { display: grid; gap: 4px; font-size: .68rem; font-weight: 900; }
+.demo-controls input {
+  height: 36px;
+  padding: 7px 9px;
+  color: #242023;
+  background: #fffaf0;
+  border: 2px solid #242023;
+  border-radius: 8px;
+  font-size: .78rem;
+  font-weight: 900;
+}
 
 .talk-button {
   position: relative;
@@ -111,4 +129,5 @@ h2 { margin: 0; font-size: 1.16rem; letter-spacing: -.035em; }
 @media (max-width: 760px) {
   .app-shell { grid-template-columns: 1fr; }
   .screen { min-height: calc(100vh - 40px); }
+  .demo-controls { grid-template-columns: 1fr; }
 }

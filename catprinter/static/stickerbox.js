@@ -14,8 +14,10 @@
   const emptyPreview = document.querySelector('.empty-preview');
   const emptyMessage = document.querySelector('#empty-message');
   const thinkingAudio = document.querySelector('#thinking-audio');
+  const demoTextInput = document.querySelector('#demo-text');
+  const thinkingMsInput = document.querySelector('#thinking-ms');
+  const transcriptMsInput = document.querySelector('#transcript-ms');
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const DEMO_TRANSCRIPT = 'six,seven';
 
   let recognition;
   let isBusy = false;
@@ -27,6 +29,12 @@
   let serialWriter;
   let serialReadBuffer = '';
   let demoTranscriptTimer;
+
+  const demoConfig = {
+    text: 'six,seven',
+    thinkingMs: 2000,
+    transcriptMs: 1800,
+  };
 
   function setStatus(message) { status.textContent = message; }
   function wait(milliseconds) { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }
@@ -40,6 +48,28 @@
     } catch (error) {
       setSerialStatus(`ESP32 write failed: ${error.message}`);
     }
+  }
+
+  function clampNumber(value, fallback, min, max) {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(max, Math.max(min, parsed));
+  }
+
+  function readDemoConfig() {
+    demoConfig.text = (demoTextInput.value || 'six,seven').trim().slice(0, 48);
+    demoConfig.thinkingMs = clampNumber(thinkingMsInput.value, 2000, 250, 10000);
+    demoConfig.transcriptMs = clampNumber(transcriptMsInput.value, 1800, 250, 10000);
+    demoTextInput.value = demoConfig.text;
+    thinkingMsInput.value = demoConfig.thinkingMs;
+    transcriptMsInput.value = demoConfig.transcriptMs;
+  }
+
+  async function sendDemoConfig() {
+    readDemoConfig();
+    await sendSerialLine(`CFG_TEXT=${demoConfig.text}`);
+    await sendSerialLine(`CFG_THINK_MS=${demoConfig.thinkingMs}`);
+    await sendSerialLine(`CFG_TRANSCRIPT_MS=${demoConfig.transcriptMs}`);
   }
 
   function setBusy(busy) {
@@ -94,6 +124,7 @@
 
   function showHardwareListening() {
     if (isBusy) return;
+    readDemoConfig();
     clearDemoTimers();
     stopThinkingSound();
     printStatus.textContent = '';
@@ -106,6 +137,7 @@
 
   function showHardwareThinking() {
     if (isBusy) return;
+    readDemoConfig();
     clearDemoTimers();
     talkButton.classList.remove('listening');
     buttonLabel.textContent = 'Thinking...';
@@ -115,9 +147,9 @@
     showStage('thinking');
     startThinkingSound();
     demoTranscriptTimer = setTimeout(() => {
-      showStage('transcript', DEMO_TRANSCRIPT);
-      setStatus('ESP32 heard: six,seven');
-    }, 2000);
+      showStage('transcript', demoConfig.text);
+      setStatus(`ESP32 heard: ${demoConfig.text}`);
+    }, demoConfig.thinkingMs);
   }
 
   async function printGeneratedSticker(jobId) {
@@ -166,7 +198,7 @@
 
     setBusy(true);
     const thinkingElapsed = performance.now() - thinkingStartedAt;
-    await wait(Math.max(0, 2000 - thinkingElapsed));
+    await wait(Math.max(0, demoConfig.thinkingMs - thinkingElapsed));
     stopThinkingSound();
     showStage('transcript', cleanPrompt);
     printStatus.textContent = '';
@@ -312,6 +344,7 @@
       serialConnect.disabled = true;
       serialConnect.textContent = 'ESP32 connected';
       setSerialStatus('ESP32 connected');
+      await sendDemoConfig();
       readSerialLoop();
     } catch (error) {
       setSerialStatus(`ESP32 connection failed: ${error.message}`);
@@ -322,4 +355,7 @@
   talkButton.addEventListener('pointerup', stopListening);
   talkButton.addEventListener('pointercancel', stopListening);
   serialConnect.addEventListener('click', connectSerial);
+  demoTextInput.addEventListener('change', sendDemoConfig);
+  thinkingMsInput.addEventListener('change', sendDemoConfig);
+  transcriptMsInput.addEventListener('change', sendDemoConfig);
 })();
