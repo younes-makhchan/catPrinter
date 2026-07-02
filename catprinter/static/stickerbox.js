@@ -17,6 +17,7 @@
   const demoTextInput = document.querySelector('#demo-text');
   const thinkingMsInput = document.querySelector('#thinking-ms');
   const transcriptMsInput = document.querySelector('#transcript-ms');
+  const printDelayMsInput = document.querySelector('#print-delay-ms');
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   let recognition;
@@ -35,6 +36,7 @@
     text: 'six,seven',
     thinkingMs: 2000,
     transcriptMs: 1800,
+    printDelayMs: 0,
   };
 
   function setStatus(message) { status.textContent = message; }
@@ -61,9 +63,11 @@
     demoConfig.text = (demoTextInput.value || 'six,seven').trim().slice(0, 48);
     demoConfig.thinkingMs = clampNumber(thinkingMsInput.value, 2000, 250, 10000);
     demoConfig.transcriptMs = clampNumber(transcriptMsInput.value, 1800, 250, 10000);
+    demoConfig.printDelayMs = clampNumber(printDelayMsInput.value, 0, 0, 10000);
     demoTextInput.value = demoConfig.text;
     thinkingMsInput.value = demoConfig.thinkingMs;
     transcriptMsInput.value = demoConfig.transcriptMs;
+    printDelayMsInput.value = demoConfig.printDelayMs;
   }
 
   async function sendDemoConfig() {
@@ -167,11 +171,14 @@
 
   async function printDemoImage() {
     if (isBusy) return;
+    readDemoConfig();
     setBusy(true);
-    demoPrintStatus = 'Printing...';
+    demoPrintStatus = demoConfig.printDelayMs ? 'Queued...' : 'Printing...';
     await sendSerialLine('PRINTING');
 
     try {
+      await wait(demoConfig.printDelayMs);
+      demoPrintStatus = 'Printing...';
       const printed = await fetch('/api/demo/print', { method: 'POST' });
       const printedData = await printed.json();
       if (!printed.ok) throw new Error(printedData.error || 'The demo image could not print.');
@@ -364,4 +371,5 @@
   demoTextInput.addEventListener('change', sendDemoConfig);
   thinkingMsInput.addEventListener('change', sendDemoConfig);
   transcriptMsInput.addEventListener('change', sendDemoConfig);
+  printDelayMsInput.addEventListener('change', readDemoConfig);
 })();

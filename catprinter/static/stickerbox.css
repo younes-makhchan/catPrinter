@@ -61,7 +61,7 @@ h2 { margin: 0; font-size: 1.16rem; letter-spacing: -.035em; }
 .serial-status { min-height: 1.2em; margin: 10px 0 0; font-size: .78rem; font-weight: 900; }
 .demo-controls {
   display: grid;
-  grid-template-columns: 1.2fr .8fr .8fr;
+  grid-template-columns: 1.2fr .8fr .8fr .8fr;
   gap: 8px;
   margin-top: 12px;
 }
